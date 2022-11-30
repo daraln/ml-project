@@ -9,7 +9,7 @@ import json
 
 # LINK = ('https://en.mclarenf-1.com/2022/gp/s8973/lap_times/')
 LINK = 'https://en.mclarenf-1.com/'
-YEARS = {'2022': 8978}
+YEARS = {'2022': 8973}
 RACES = {'2022': 22}
 
 CATEGORIES = ['lapcharts', 'sector_times', 'results', 'grid', 'sector_speeds']
@@ -89,6 +89,7 @@ def main():
 
         # Loop through races
         for i in range(22):
+            rdf = pd.DataFrame(columns=[R, LN, S, ID, T, E, G, Q, LP, LT, GTL, P, PO, FS1, FS2, FS3, IDE, S1S, S2S, S3S, ST, TY, PT])
             race_id = first_race_id + (i * 5)
             r_data_for_drivers = {}
 
@@ -108,6 +109,7 @@ def main():
                 print(result)
                 short_name = result[2][:3]
                 if len(result) < 10:
+                    r_data_for_drivers[short_name] = None
                     continue
                 r_data_for_drivers[short_name] = {S: short_name, P: result[0].replace('=', ''), U: result[1], C: result[4], E: result[5], L: result[7], TI: result[8], PO: result[9]}
             print(r_data_for_drivers)
@@ -126,6 +128,9 @@ def main():
             for stime in stimes:
                 short_name = stime[1][:3]
                 if short_name not in r_data_for_drivers:
+                    continue
+                if len(stime) < 10:
+                    r_data_for_drivers[short_name] = None
                     continue
                 r_data_for_drivers[short_name][FS1] = stime[6]
                 r_data_for_drivers[short_name][FS2] = stime[7]
@@ -146,6 +151,9 @@ def main():
             for speed in speeds:
                 short_name = speed[1][:3]
                 if short_name not in r_data_for_drivers:
+                    continue
+                if len(speed) < 10:
+                    r_data_for_drivers[short_name] = None
                     continue
                 r_data_for_drivers[short_name][S1S] = speed[6]
                 r_data_for_drivers[short_name][S2S] = speed[7]
@@ -179,9 +187,10 @@ def main():
                 position = pos.find('div').get_text()
                 # driver = spans[4].get_text()
                 short = spans[1].get_text()
-                if short not in r_data_for_drivers:
-                    r_data_for_drivers[short] = {}
-                    r_data_for_drivers[short][S] = short
+                if short not in r_data_for_drivers or r_data_for_drivers[short] is None:
+                    continue
+                    # r_data_for_drivers[short] = {}
+                    # r_data_for_drivers[short][S] = short
                 team = spans[6].get_text()
                 quali_time = spans[8].get_text()
                 driver_id = pos.find('span').get('data-id')
@@ -199,7 +208,7 @@ def main():
             for driver in r_data_for_drivers:
                 print(driver)
                 print(r_data_for_drivers[driver])
-                if ID not in r_data_for_drivers[driver]:
+                if r_data_for_drivers[driver] is None or ID not in r_data_for_drivers[driver]:
                     continue
                 d_id = r_data_for_drivers[driver][ID]
                 laps = {}
@@ -308,13 +317,14 @@ def main():
 
 
                     df.loc[len(df.index)] = [race, lap, driver, d_id, team, engine, grid, quali_time, lap_position, lap_time, gap_to_leader, position, points, fs1, fs2, fs3, ide, s1s, s2s, s3s, st, tyre, pit_time]
+                    rdf.loc[len(df.index)] = [race, lap, driver, d_id, team, engine, grid, quali_time, lap_position, lap_time, gap_to_leader, position, points, fs1, fs2, fs3, ide, s1s, s2s, s3s, st, tyre, pit_time]
                     # print(lap[PT], lap[TY], lap[GTL], lap[LT], lap[LP])
 
                 
             time.sleep(3)
 
-            df.to_csv('./' + grand_prix + '.csv', index=False)
-            df.to_csv('./output.csv', index=False)
+            rdf.to_csv('./scraped_data/' + grand_prix + '.csv', index=False)
+            df.to_csv('./scraped_data/ALL_RACES.csv', index=False)
 
             # Don't spam requests
             time.sleep(3)
