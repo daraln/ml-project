@@ -181,6 +181,31 @@ def removeZeros(df, fields):
         for i in to_drop:
             df.drop(i, axis=0, inplace=True)
 
+
+def removeSCLaps(df, race, lap_field):
+    race_names = {
+        'Bahrain': [44, 45, 46, 47, 48, 49, 50, 51],
+        'Abu Dhabi': [],
+        'Australian': [3, 4, 5, 6, 23, 24, 25, 26, 39, 40],
+        'Austrian': [57, 58, 59],
+        'Belgian': [1, 2, 3, 4],
+        'French': [18, 19, 20, 49, 50],
+        'Hungarian': [2, 3, 66, 67, 68, 69],
+        'Mexican': [],
+        'Miami': [40, 41, 42, 43, 44, 45, 46],
+        'Saudi Arabian': [16, 17, 18, 19, 20, 37, 38, 39, 40]
+    }
+    races = df.loc[:, race]
+    laps = df.loc[:, lap_field]
+    to_drop = []
+    for i in range(len(races)):
+        r = races[i]
+        if laps[i] in race_names[r]:
+            to_drop.append(i)
+    for i in to_drop:
+        df.drop(i, axis=0, inplace=True)
+
+
 def toMs(item):
     if not isinstance(item, str) and math.isnan(item):
         return 0
@@ -191,7 +216,7 @@ def toMs(item):
 
 
 def main():
-    # df = pd.read_csv(IN + "saudi arabian.csv")
+    # df = pd.read_csv(IN + "austrian.csv")
     # processTimeField(df, LT)
     # processTimeField(df, Q)
     # processTimeField(df, GTL)
@@ -206,26 +231,33 @@ def main():
     # processDist(df, R)
     # print(df)
 
-    # df.to_csv(OUT + "saudi arabian.csv", index=False)
+    # df.to_csv(OUT + "austrian.csv", index=False)
 
-    # df = pd.read_csv(OUT + "bahrain.csv")
-    # abu = pd.read_csv(OUT + "abu dhabi.csv")
-    # aus = pd.read_csv(OUT + "australian.csv")
-    # bel = pd.read_csv(OUT + "belgian.csv")
-    # fre = pd.read_csv(OUT + "french.csv")
-    # hun = pd.read_csv(OUT + "hungarian.csv")
-    # mex = pd.read_csv(OUT + "mexican.csv")
-    # mia = pd.read_csv(OUT + "miami.csv")
-    # sau = pd.read_csv(OUT + "saudi arabian.csv")
-    # df = pd.concat([df, abu, aus, bel, fre, hun, mex, mia, sau], ignore_index=True)
+    df = pd.read_csv(OUT + "bahrain.csv")
+    abu = pd.read_csv(OUT + "abu dhabi.csv")
+    aus = pd.read_csv(OUT + "australian.csv")
+    bel = pd.read_csv(OUT + "belgian.csv")
+    fre = pd.read_csv(OUT + "french.csv")
+    hun = pd.read_csv(OUT + "hungarian.csv")
+    mex = pd.read_csv(OUT + "mexican.csv")
+    mia = pd.read_csv(OUT + "miami.csv")
+    sau = pd.read_csv(OUT + "saudi arabian.csv")
+    aut = pd.read_csv(OUT + "austrian.csv")
+    df = pd.concat([df, abu, aus, bel, fre, hun, mex, mia, sau, aut], ignore_index=True)
 
-    # removeStartLaps(df, LN)
+    removeZeros(df, [LT])
+    df.reset_index(inplace=True)
+    removeSCLaps(df, R, LN)
+    df.reset_index(inplace=True)
+    removeStartLaps(df, LN)
+    # df.reset_index(inplace=True)
 
     # df.to_csv(OUT + "race_data_no_starts.csv", index=False)
 
-    df = pd.read_csv(OUT + "race_data_no_starts.csv")
-    removeZeros(df, [LT])
-    df.to_csv(OUT + "race_data_laptimes_removed.csv")
+    # df = pd.read_csv(OUT + "race_data_no_starts.csv")
+    # removeZeros(df, [LT])
+    # removeSCLaps(df, R, LN)
+    df.to_csv(OUT + "race_data_no_SC.csv")
 
 
 
