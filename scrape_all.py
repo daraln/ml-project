@@ -7,7 +7,6 @@ import json
 
 # Grid position spans 5:name, 7:team , 9:quali time
 
-# LINK = ('https://en.mclarenf-1.com/2022/gp/s8973/lap_times/')
 LINK = 'https://en.mclarenf-1.com/'
 YEARS = {'2022': 8973}
 RACES = {'2022': 22}
@@ -20,8 +19,6 @@ GRID_CLASS = 'grid-pos'
 # SCRIPT_TAG = '(.*)data":'
 SCRIPT_TAG = '(.*)data":(.*?)}, "chartdiv'
 
-# 821 ver
-# 833 lec
 
 N = 'name'
 T = 'team'
@@ -53,11 +50,6 @@ GTL = 'gap_to_leader'
 PT = 'pit_time'
 TY = 'tyre'
 
-# def getIdFromValue(table, value, value_type):
-#     for k, v in table.items():
-#         if v[value_type] == name:
-#             return k
-
 
 def getDataJson(year, race, category, regex=SCRIPT_TAG):
     time.sleep(2)
@@ -80,7 +72,6 @@ def main():
     grid_table = {}
 
     # race, lap num, name, team, engine, grid, quali time, lap position, gap, pit time, tyre, final position, points, race time, sector info
-    # df = pd.DataFrame(columns=[R, LN, S, ID, N, T, E, G, Q, LP, GTL, PT, TY, ST, P, CT, PO, FS1, FS2, FS3, IDE, S1S, S2S, S3S])
     df = pd.DataFrame(columns=[R, LN, S, ID, T, E, G, Q, LP, LT, GTL, P, PO, FS1, FS2, FS3, IDE, S1S, S2S, S3S, ST, TY, PT])
 
     # Loop through years
@@ -162,7 +153,7 @@ def main():
             print(r_data_for_drivers)
             print(json.dumps(r_data_for_drivers, indent=4))
             time.sleep(2)
-            
+
             # Lap chart data
             lap_data = getDataJson(year, race_id, 'lapcharts')
             print(json.dumps(lap_data, indent=4))
@@ -185,18 +176,12 @@ def main():
             for pos in grid:
                 spans = pos.findAll('span')
                 position = pos.find('div').get_text()
-                # driver = spans[4].get_text()
                 short = spans[1].get_text()
                 if short not in r_data_for_drivers or r_data_for_drivers[short] is None:
                     continue
-                    # r_data_for_drivers[short] = {}
-                    # r_data_for_drivers[short][S] = short
                 team = spans[6].get_text()
                 quali_time = spans[8].get_text()
                 driver_id = pos.find('span').get('data-id')
-                # driver_id_table[driver_id] = driver
-                # driver_id_table[driver] = driver_id
-                # driver_details[short] = {'name': driver, I: driver_id, T: team, G: position}
                 r_data_for_drivers[short][ID] = driver_id
                 r_data_for_drivers[short][G] = position
                 r_data_for_drivers[short][Q] = quali_time
@@ -231,9 +216,6 @@ def main():
                     if len(speed) < 2:
                         continue
                     la = speed[0]
-                    # print(la)
-                    # print(speed)
-                    # print(r_data_for_drivers[driver])
                     r_data_for_drivers[driver][la] = speed[1]
 
                 tyre = {}
@@ -248,13 +230,9 @@ def main():
                     if ln == 'Start':
                         pit = lap['tooltip']
                         if d_id in pit:
-                            # print(pit)
                             pit = pit[d_id].split(' ')
                             if len(pit) == 5:
                                 tyre[d_id] = pit[3] + pit[4]
-                                
-                    # print(laps)
-                    # print(tyre)
 
                 for lap in lap_data:
                     ln = lap['lap']
@@ -286,8 +264,6 @@ def main():
                     laps[ln][TY] = tyre[d_id]
                 print(laps)
 
-
-                # [R, LN, S, ID, N, T, E, G, Q, LP, LT, GTL, P, PO, FS1, FS2, FS3, IDE, S1S, S2S, S3S, ST])
                 for lap, ld in laps.items():
                     d = r_data_for_drivers[driver]
                     print(ld)
@@ -315,18 +291,12 @@ def main():
                     s3s = d[S3S]
                     st = d[ST]
 
-
                     df.loc[len(df.index)] = [race, lap, driver, d_id, team, engine, grid, quali_time, lap_position, lap_time, gap_to_leader, position, points, fs1, fs2, fs3, ide, s1s, s2s, s3s, st, tyre, pit_time]
                     rdf.loc[len(df.index)] = [race, lap, driver, d_id, team, engine, grid, quali_time, lap_position, lap_time, gap_to_leader, position, points, fs1, fs2, fs3, ide, s1s, s2s, s3s, st, tyre, pit_time]
-                    # print(lap[PT], lap[TY], lap[GTL], lap[LT], lap[LP])
-
-                
-            time.sleep(3)
 
             rdf.to_csv('./scraped_data/' + grand_prix + '.csv', index=False)
             df.to_csv('./scraped_data/ALL_RACES.csv', index=False)
 
-            # Don't spam requests
             time.sleep(3)
 
 
