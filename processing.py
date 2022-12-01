@@ -111,6 +111,7 @@ def processLaps(df, field):
         if isinstance(laps[i], str) and laps[i] == 'Start':
             laps[i] = 0
 
+
 def processLapPct(df, lap_field, tyre_age, next_pit):
     start_index = 0
     laps = df.loc[:, lap_field]
@@ -170,6 +171,16 @@ def removeStartLaps(df, lap_field):
         df.drop(i, axis=0, inplace=True)
 
 
+def removeZeros(df, fields):
+    for f in fields:
+        field = df.loc[:, f]
+        to_drop = []
+        for i in range(len(field)):
+            if field[i] == 0:
+                to_drop.append(i)
+        for i in to_drop:
+            df.drop(i, axis=0, inplace=True)
+
 def toMs(item):
     if not isinstance(item, str) and math.isnan(item):
         return 0
@@ -180,22 +191,22 @@ def toMs(item):
 
 
 def main():
-    df = pd.read_csv(IN + "saudi arabian.csv")
-    processTimeField(df, LT)
-    processTimeField(df, Q)
-    processTimeField(df, GTL)
-    processTimeField(df, FS1)
-    processTimeField(df, FS2)
-    processTimeField(df, FS3)
-    processTimeField(df, IDE)
-    processTimeField(df, PT)
-    processLaps(df, LN)
-    processPitData(df, TY, PT, LN)
-    processLapPct(df, LN, TA, NP)
-    processDist(df, R)
+    # df = pd.read_csv(IN + "saudi arabian.csv")
+    # processTimeField(df, LT)
+    # processTimeField(df, Q)
+    # processTimeField(df, GTL)
+    # processTimeField(df, FS1)
+    # processTimeField(df, FS2)
+    # processTimeField(df, FS3)
+    # processTimeField(df, IDE)
+    # processTimeField(df, PT)
+    # processLaps(df, LN)
+    # processPitData(df, TY, PT, LN)
+    # processLapPct(df, LN, TA, NP)
+    # processDist(df, R)
     # print(df)
 
-    df.to_csv(OUT + "saudi arabian.csv", index=False)
+    # df.to_csv(OUT + "saudi arabian.csv", index=False)
 
     # df = pd.read_csv(OUT + "bahrain.csv")
     # abu = pd.read_csv(OUT + "abu dhabi.csv")
@@ -211,6 +222,11 @@ def main():
     # removeStartLaps(df, LN)
 
     # df.to_csv(OUT + "race_data_no_starts.csv", index=False)
+
+    df = pd.read_csv(OUT + "race_data_no_starts.csv")
+    removeZeros(df, [LT])
+    df.to_csv(OUT + "race_data_laptimes_removed.csv")
+
 
 
 if __name__ == "__main__":
