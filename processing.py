@@ -36,6 +36,7 @@ TYN = 'tyre_num'
 TA = 'tyre_age'
 U = 'used'
 NP = 'next_pit'
+TOT = 'total_laps'
 # APT = 'avg_pit_time'
 
 
@@ -48,6 +49,9 @@ def processPitData(df, tyref, pitf, lapsf):
     tyre_num = [1] * len(laps)
     next_pit = [0] * len(laps)
     tyre_ages = [0] * len(laps)
+    use_soft = [0] * len(laps)
+    use_medium = [0] * len(laps)
+    use_hard = [0] * len(laps)
     # current_tyre = None
     tyre_age = 0
     last_pit_index = 0
@@ -59,10 +63,13 @@ def processPitData(df, tyref, pitf, lapsf):
 
         if "Soft" in tyre:
             tyre_num[i] = 1
+            use_soft[i] = 1
         elif "Medium" in tyre:
             tyre_num[i] = 2
+            use_medium[i] = 1
         elif "Hard" in tyre:
             tyre_num[i] = 3
+            use_hard[i] = 1
         else:
             tyre_num[i] = 4
 
@@ -104,6 +111,64 @@ def processLaps(df, field):
         if isinstance(laps[i], str) and laps[i] == 'Start':
             laps[i] = 0
 
+def processLapPct(df, lap_field, tyre_age, next_pit):
+    start_index = 0
+    laps = df.loc[:, lap_field]
+    tyre_ages = df.loc[:, tyre_age]
+    next_pits = df.loc[:, next_pit]
+    lap_pcts = [0] * len(laps)
+    tyre_age_pcts = [0] * len(laps)
+    next_pit_pcts = [0] * len(laps)
+    total_laps = [0] * len(laps)
+    for i in range(len(laps)):
+        lap = laps[i]
+        if lap == 0 and i > 0:
+            max_laps = float(laps[i - 1])
+            for j in range(start_index, i):
+                lap_pcts[j] = float(laps[j]) / max_laps
+                tyre_age_pcts[j] = float(tyre_ages[j]) / max_laps
+                next_pit_pcts[j] = float(next_pits[j]) / max_laps
+                total_laps[j] = max_laps
+            start_index = i
+    df[TOT] = total_laps
+    df['lap_pcts'] = lap_pcts
+    df['tyre_age_pct'] = tyre_age_pcts
+    df['next_pit_pcts'] = next_pit_pcts
+
+    for i in range(len(laps)):
+        if isinstance(laps[i], str) and laps[i] == 'Start':
+            laps[i] = 0
+
+
+def processDist(df, race):
+    distances = {
+        'Bahrain': 5412,
+        'Abu Dhabi': 5281,
+        'Australian': 5278,
+        'Austrian': 4318,
+        'Belgian': 7004,
+        'French': 5842,
+        'Hungarian': 4381,
+        'Mexican': 4304,
+        'Miami': 5412,
+        'Saudi Arabian': 6174
+    }
+    races = df.loc[:, race]
+    lap_distances = [0] * len(races)
+    for i in range(len(races)):
+        lap_distances[i] = distances[races[i]]
+    df['distances'] = lap_distances
+
+
+def removeStartLaps(df, lap_field):
+    laps = df.loc[:, lap_field]
+    to_drop = []
+    for i in range(len(laps)):
+        if laps[i] == 0:
+            to_drop.append(i)
+    for i in to_drop:
+        df.drop(i, axis=0, inplace=True)
+
 
 def toMs(item):
     if not isinstance(item, str) and math.isnan(item):
@@ -115,20 +180,37 @@ def toMs(item):
 
 
 def main():
-    df = pd.read_csv(OUT + "bahrain.csv")
-    # processTimeField(df, LT)
-    # processTimeField(df, Q)
-    # processTimeField(df, GTL)
-    # processTimeField(df, FS1)
-    # processTimeField(df, FS2)
-    # processTimeField(df, FS3)
-    # processTimeField(df, IDE)
-    # processTimeField(df, PT)
-    # processLaps(df, LN)
+    df = pd.read_csv(IN + "saudi arabian.csv")
+    processTimeField(df, LT)
+    processTimeField(df, Q)
+    processTimeField(df, GTL)
+    processTimeField(df, FS1)
+    processTimeField(df, FS2)
+    processTimeField(df, FS3)
+    processTimeField(df, IDE)
+    processTimeField(df, PT)
+    processLaps(df, LN)
     processPitData(df, TY, PT, LN)
-    print(df)
+    processLapPct(df, LN, TA, NP)
+    processDist(df, R)
+    # print(df)
 
-    df.to_csv(OUT + "bahrain.csv", index=False)
+    df.to_csv(OUT + "saudi arabian.csv", index=False)
+
+    # df = pd.read_csv(OUT + "bahrain.csv")
+    # abu = pd.read_csv(OUT + "abu dhabi.csv")
+    # aus = pd.read_csv(OUT + "australian.csv")
+    # bel = pd.read_csv(OUT + "belgian.csv")
+    # fre = pd.read_csv(OUT + "french.csv")
+    # hun = pd.read_csv(OUT + "hungarian.csv")
+    # mex = pd.read_csv(OUT + "mexican.csv")
+    # mia = pd.read_csv(OUT + "miami.csv")
+    # sau = pd.read_csv(OUT + "saudi arabian.csv")
+    # df = pd.concat([df, abu, aus, bel, fre, hun, mex, mia, sau], ignore_index=True)
+
+    # removeStartLaps(df, LN)
+
+    # df.to_csv(OUT + "race_data_no_starts.csv", index=False)
 
 
 if __name__ == "__main__":
