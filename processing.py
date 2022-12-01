@@ -35,6 +35,7 @@ PTL = 'pit_this_lap'
 TYN = 'tyre_num'
 TA = 'tyre_age'
 U = 'used'
+NP = 'next_pit'
 # APT = 'avg_pit_time'
 
 
@@ -87,6 +88,7 @@ def processPitData(df, tyref, pitf, lapsf):
     df[U] = used
     df[TA] = tyre_ages
     df[PTL] = pit_this_lap
+    df[NP] = next_pit
 
 
 def processTimeField(df, field):
@@ -113,16 +115,16 @@ def toMs(item):
 
 
 def main():
-    df = pd.read_csv(IN + "bahrain.csv")
-    processTimeField(df, LT)
-    processTimeField(df, Q)
-    processTimeField(df, GTL)
-    processTimeField(df, FS1)
-    processTimeField(df, FS2)
-    processTimeField(df, FS3)
-    processTimeField(df, IDE)
-    processTimeField(df, PT)
-    processLaps(df, LN)
+    df = pd.read_csv(OUT + "bahrain.csv")
+    # processTimeField(df, LT)
+    # processTimeField(df, Q)
+    # processTimeField(df, GTL)
+    # processTimeField(df, FS1)
+    # processTimeField(df, FS2)
+    # processTimeField(df, FS3)
+    # processTimeField(df, IDE)
+    # processTimeField(df, PT)
+    # processLaps(df, LN)
     processPitData(df, TY, PT, LN)
     print(df)
 
