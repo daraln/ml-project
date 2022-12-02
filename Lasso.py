@@ -4,45 +4,156 @@ import numpy as np
 import pandas as pd
 import sklearn
 import math
-import DataGlobals as g
 
-df = pd.read_csv( "./processed_data/race_data_no_dnfs.csv" )
+df = pd.read_csv( "fixedpits.csv" )
 print( df . head ( ) )
-race = df.iloc[:,3]
+
+compound = [[1,1,1,0,0],
+[0,0,1,1,1],
+[0,1,1,0,1],
+[0,1,1,1,0],
+[0,1,1,1,0],
+[0,1,1,1,0],
+[0,1,1,1,0],
+[0,1,1,1,0],
+[0,1,1,1,0]]
 
 
-lap	= df.loc[:,g.LAP_N]
-short_name = df.loc[:,g.SHORT_NAME]
-driver_id = df.loc[:,g.ID]
-team = df.loc[:,g.TEAM]
-engine = df.loc[:,g.ENGINE]
-grid_position = df.loc[:,g.GRID]
-quali_time = df.loc[:,g.QUALI_TIME]
-lap_position = df.loc[:,g.LAP_POS]
-lap_time = df.loc[:,g.LAP_TIME]
-gap_to_leader = df.loc[:,g.GTL]
-position = df.loc[:,g.POS]
-points = df.loc[:,g.POINTS]
-fastest_s1 = df.iloc[:,16]
-fastest_s2 = df.iloc[:,17]
-fastest_s3 = df.iloc[:,18]
-ideal_time = df.iloc[:,19]
-s1_speed = df.iloc[:,20]
-s2_speed = df.iloc[:,21]
-s3_speed = df.iloc[:,22]
-speed_trap = df.iloc[:,23]
-tyre = df.loc[:, g.TYRE_STRING]
-pit_time = df.iloc[:,25]
-tyre_num = df.iloc[:, 26]
-used = df.iloc[:, 27]
-tyre_age = df.iloc[:, 28]
-pit_this_lap = df.iloc[:, 29]
-next_pit = df.iloc[:, 30]
-total_laps = df.iloc[:, 31]
-lap_pcts = df.iloc[:, 32]
-# tyre_age_pct = df.iloc[:, 33]
-# next_pit_pcts = df.iloc[:, 34]
-# distances = df.iloc[:, 35]
+
+
+
+'''
+race = df.loc[:,race]
+lap	= df.loc[:,lap]
+short_name = df.loc[:,short_name]
+id = df.loc[:,id]
+team = df.loc[:,team]
+engine = df.loc[:,engine]
+grid_position = df.loc[:,grid_position]
+quali_time = df.loc[:,quali_time]
+lap_position = df.loc[:,lap_position]
+lap_time = df.loc[:,lap_time]
+gap_to_leader = df.loc[:,gap_to_leader]
+position = df.loc[:,position]
+points = df.loc[:,points]
+fastest_s1 = df.loc[:,fastest_s1]
+fastest_s2 = df.loc[:,fastest_s2]
+fastest_s3 = df.loc[:,fastest_s3]
+ideal_time = df.loc[:,ideal_time]
+s1_speed = df.loc[:,s1_speed]
+s2_speed = df.loc[:,s2_speed]
+s3_speed = df.loc[:,s3_speed]
+speed_trap = df.loc[:,speed_trap]
+#tyre = df.loc[:,tyre]
+soft = df.loc[:,soft]
+medium = df.loc[:,medium]
+hard= df.loc[:,hard]
+pit_time = df.loc[:,pit_time]
+tyre_num = df.loc[:, tyre_num]
+used = df.loc[:, used]
+tyre_age = df.loc[:, tyre_age]
+pit_this_lap = df.loc[:, pit_this_lap]
+next_pit = df.loc[:, next_pit]
+total_laps = df.loc[:, total_laps]
+lap_pcts = df.loc[:, lap_pcts]
+tyre_age_pct = df.loc[:, tyre_age_pct]
+next_pit_pcts = df.loc[:, next_pit_pcts]
+distances = df.loc[:, distances]
+'''
+race = df.iloc[:,0]
+lap	= df.iloc[:,1]
+short_name = df.iloc[:,2]
+id = df.iloc[:,3]
+team = df.iloc[:,4]
+engine = df.iloc[:,5]
+grid_position = df.iloc[:,6]
+quali_time = df.iloc[:,7]
+lap_position = df.iloc[:,8]
+lap_time = df.iloc[:,9]
+gap_to_leader = df.iloc[:,10]
+position = df.iloc[:,11]
+points = df.iloc[:,12]
+fastest_s1 = df.iloc[:,13]
+fastest_s2 = df.iloc[:,14]
+fastest_s3 = df.iloc[:,15]
+ideal_time = df.iloc[:,16]
+s1_speed = df.iloc[:,17]
+s2_speed = df.iloc[:,18]
+s3_speed = df.iloc[:,19]
+speed_trap = df.iloc[:,20]
+tyre = df.iloc[:,21]
+pit_time = df.iloc[:,22]
+tyre_num = df.iloc[:, 23]
+used = df.iloc[:, 24]
+tyre_age = df.iloc[:, 25]
+pit_this_lap = df.iloc[:, 26]
+next_pit = df.iloc[:, 27]
+total_laps = df.iloc[:, 28]
+lap_pcts = df.iloc[:, 29]
+tyre_age_pct = df.iloc[:, 30]
+next_pit_pcts = df.iloc[:, 31]
+distances = df.iloc[:, 32]
+soft=df.iloc[:, 33]
+medium=df.iloc[:, 34]
+hard=df.iloc[:, 35]
+c1=df.iloc[:, 36]
+c2=df.iloc[:, 37]
+c3=df.iloc[:, 38]
+c4=df.iloc[:, 39]
+c5=df.iloc[:, 40]
+
+for i in range(len(soft)):
+    if hard[i] == 1:
+        if c5[i] == 1:
+            c1[i] = 0
+            c2[i] = 0
+            c3[i] = 0
+            c4[i] = 0
+        if c5[i] == 0 and c4[i]==1:
+            c1[i] = 0
+            c2[i] = 0
+            c3[i] = 0
+            c5[i] = 0
+        if c5[i] == 0 and c4[i]==0 and c3[i] == 1:
+            c1[i] = 0
+            c2[i] = 0
+            c3[i] = 0
+            c5[i] = 0
+    if soft[i] == 1:
+        if c1[i] == 1:
+            c5[i] = 0
+            c2[i] = 0
+            c3[i] = 0
+            c4[i] = 0
+        if c1[i] == 0 and c2[i]==1:
+            c1[i] = 0
+            c4[i] = 0
+            c3[i] = 0
+            c5[i] = 0
+        if c1[i] == 0 and c2[i]==0 and c3[i] == 1:
+            c1[i] = 0
+            c2[i] = 0
+            c4[i] = 0
+            c5[i] = 0
+    if medium[i] == 1:
+        if c5[i] == 1 and c4[i] == 1:
+            c1[i] = 0
+            c2[i] = 0
+            c3[i] = 0
+            c5[i] = 0
+        if c5[i] == 0 and c4[i]==1 and c3[i] == 1:
+            c1[i] = 0
+            c2[i] = 0
+            c4[i] = 0
+            c5[i] = 0
+        if c5[i] == 0 and c4[i]==0 and c3[i] == 1 and c2[i] == 1:
+            c1[i] = 0
+            c4[i] = 0
+            c3[i] = 0
+            c5[i] = 0
+
+
+'''
 soft=[]
 medium=[]
 hard=[]
@@ -59,20 +170,20 @@ for i in range(len(tyre)):
         soft.append(0)
         medium.append(0)
         hard.append(1)
-minimum = []
+'''
+min = []
 
 for i in range(len(race)):
     j = -1
     if i==0:
-        minimum.append(999)
+        min.append(999)
         j+1
     if i>0:
         if race[i] != race[i - 1]:
-            minimum.append(999)
+            min.append(999)
             j+1
-    if minimum[j]>lap_time[i]:
-        minimum[j] = lap_time[i]
-# print(minimum)
+    if min[j]>lap_time[i]:
+        min[j] = lap_time[i]
 lap_time_norm = []
 for i in range(len(lap_time)):
     j = -1
@@ -81,31 +192,79 @@ for i in range(len(lap_time)):
     if i>0:
         if race[i] != race[i - 1]:
             j+1
-    lap_time_norm.append(lap_time[i]/minimum[j])
+    lap_time_norm.append(lap_time[i]/min[j])
 
-# X=np.column_stack( ( quali_time, gap_to_leader, speed_trap, soft,medium,hard, lap_pcts, lap,pit_time, tyre_age,total_laps,distances,next_pit ) )
-
-# This is easier than using indices
-tyre_age_pct = df.loc[:, g.TYRE_AGE_PCT]
-tyre_num = df.loc[:, g.TYRE_NUM]
-lap_pcts = df.loc[:, g.LAP_PCT]
-quali_time = df.loc[:, g.QUALI_TIME]
-pit_time = df.loc[:, g.PIT_TIME]
-lap_time = df.loc[:, g.LAP_TIME]
-distance = df.loc[:, g.DISTANCE]
-used = df.loc[:, g.USED]
-
-X=np.column_stack( ( soft, medium, hard, tyre_age_pct, lap_pcts,quali_time, pit_time) )#features
+#X=np.column_stack( ( quali_time, gap_to_leader, speed_trap, soft,medium,hard, lap_pcts, lap,pit_time, tyre_age,total_laps,distances,next_pit ) )
+#X=np.column_stack( ( soft,medium,hard,tyre_age_pct ,lap_pcts,quali_time, pit_time) )#features
+X=np.column_stack( ( c1,c2,c3,c4,c5,tyre_age_pct ,lap_pcts,quali_time, pit_time) )
 y = lap_time
-# print(y)
-# y = lap_time_norm
+#y = lap_time_norm
+
+from sklearn.linear_model import Lasso, Ridge
+from sklearn.preprocessing import PolynomialFeatures
+
+n_range = [1]
+C_range = [25]#[0.05, 0.1, 1,2,3,4,5,10,25,50,75,100]
+num_splits = 5
+for C in C_range:
+    mean = []
+    standard = []
+    for n in n_range:
+        #cross validation by splitting the data into 5 groups
+        #each iteration uses a new fifth as the test data
+        from sklearn.model_selection import KFold
+        kf = KFold(n_splits=num_splits)
+        error = []
+        for train, test in kf.split(X):
+            alpha = 1/(2*C)
+            Xtrain_poly = PolynomialFeatures(n).fit_transform(X[train])
+            Xtest_poly = PolynomialFeatures(n).fit_transform(X[test])
+            X_poly = PolynomialFeatures(n).fit_transform(X)
+
+            enter = [[0, 0, 0, 1, 0, 0.6, 0.8, 90.5, 0]]  # predict particular scenarios
+            enter = PolynomialFeatures(n).fit_transform(enter)
+
+            model = Lasso(alpha)
+            #model = Ridge(alpha)
+            model.fit(Xtrain_poly, y[train])
+            #predict = model.predict(Xtest_poly)
+            plt.rc('font', size = 18)
+            plt.rcParams['figure.constrained_layout.use'] = True
+            #plt.plot(fpr, tpr)
+            from sklearn.metrics import mean_squared_error
+            predict = model.predict(X_poly)
+            # print("C: "+str(C))
+            # print("coef: "+str(model.coef_))
+            # print("intercept: "+str(model.intercept_))
+            print("mean squared error: " + str(mean_squared_error(ytest, predict)))
+            error.append(mean_squared_error(y[test],predict))
+            #print("intercept: "+str(model.intercept_))
+            #print("model coef: "+str(model.coef_))
+
+            font1 = {'family':'serif','color':'black','size':15}
+            font2 = {'family':'serif','color':'black','size':10}
+            #fig = plt.figure()
+            #ax = plt.subplot(1,1,1)
+
+        fig = plt.figure(figsize=(10, 6), dpi=120)
+        plt.plot(fpr, tpr,label="Model")
+        plt.title("ROC curve for C = " + str(C)+" and n = "+str(n), fontdict=font1)
+        plt.xlabel("False Positive Rate", fontdict=font2)
+        plt.ylabel("True Positive Rate", fontdict=font2)
+        #plt.show()
+
+        mean.append(sum(error)/len(error))    #these will be our y values
+        standard.append(statistics.stdev(error))#these are our y error values
+
+
 from sklearn.model_selection import train_test_split    #holding back 20% of data for testing
 Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.2)
 
 from sklearn.linear_model import Lasso, Ridge
 from sklearn.preprocessing import PolynomialFeatures
-n = 2
-C_range = [1,5,10,50,100,500,1000]  #values of C iterated over
+n = 3
+#C_range = [1,5,10,50,100,500,1000]  #values of C iterated over
+C_range = [25]
 for C in C_range:
     alpha = 1/(2*C) #models use alpha as a hyperparameter
     #introducing higher order features
@@ -113,10 +272,9 @@ for C in C_range:
     Xtest_poly = PolynomialFeatures(n).fit_transform(Xtest)
     X_poly = PolynomialFeatures(n).fit_transform(X)
     #enter = [[90,5,300,1,0,0,0.2,5,20,10,60,5000,15]]
-    # enter = [[1,0,0,10,0.1,90.5,20,0]]       #predict particular scenarios
-    enter = [[1, 0, 0, 0.5, 0.5, 95.3, 0]]
+    enter = [[0,0,0,1,0,0.6,0.8,90.5,0]]       #predict particular scenarios
     enter = PolynomialFeatures(n).fit_transform(enter)
-    model = Lasso(alpha)
+    model = Lasso(alpha,max_iter=500000)
     #model = Ridge(alpha)
     model.fit(Xtrain_poly, ytrain)
     predict = model.predict(Xtest_poly)
@@ -133,31 +291,6 @@ for C in C_range:
     font2 = {'family':'serif','color':'black','size':10}
     fig = plt.figure()
 
-    #ax = plt.subplot(1,1,1)
-    ax = plt.axes(projection='3d')
-    #plotting all data
-    p01 = ax.scatter3D(speed_trap, gap_to_leader,y,alpha = 0.5,color ="blue",label = "Training Data")
-    X1test = []
-    X2test = []
-    for i in range(len(Xtest)):#plotting test data
-        X1test.append(Xtest[i][0])
-        X2test.append(Xtest[i][1])
-    #p02 = ax.scatter3D(X1test,X2test,predict,color = "orange",label = "Test Data")
-    fake = ax.scatter3D(X1test, X2test, predict, alpha=0,color="r", label="Predictions")
-
-    mesh = []
-    a = b = np.arange(-2.0, 2.0, 0.05)
-    A, B = np.meshgrid(a, b)
-    for i in range(len(a)):     #preparing mesh grid to plot predictions
-        for j in range(len(b)):
-            mesh.append([])
-            mesh[-1].append(a[i])
-            mesh[-1].append(b[j])
-
-    mesh_poly = PolynomialFeatures(n).fit_transform(mesh)
-    #zs = model.predict(mesh_poly)
-    #Z = zs.reshape(A.shape)
-    #Surface = ax.plot_surface(B,A,Z,color="r",alpha = 0.6)#plotting prediction surface
 
     #plt.xlim(-1.1,1.1)
     #plt.ylim(-1.1,1.1)
@@ -173,3 +306,38 @@ for C in C_range:
     ax.view_init(elev = 20,azim = 45)
 
     #plt.show()
+
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.preprocessing import PolynomialFeatures
+
+k_range =[5]# np.arange(1,101,5)
+num_splits = 5
+mean = []
+standard = []
+for k in k_range:
+    #cross validation by splitting the data into 5 groups
+    #each iteration uses a new fifth as the test data
+    from sklearn.model_selection import KFold
+    kf = KFold(n_splits=num_splits)
+    Accuracy = []
+    for train, test in kf.split(X):
+        model = KNeighborsRegressor(n_neighbors=k, weights='uniform').fit(X[train], y[train])
+        model.fit(X[train], y[train])
+        Xtrain_poly = PolynomialFeatures(n).fit_transform(Xtrain)
+        Xtest_poly = PolynomialFeatures(n).fit_transform(Xtest)
+        X_poly = PolynomialFeatures(n).fit_transform(X)
+        # enter = [[90,5,300,1,0,0,0.2,5,20,10,60,5000,15]]
+        enter = [[0, 0, 0, 1, 0, 0.6, 0.8, 90.5, 0]]  # predict particular scenarios
+        enter = PolynomialFeatures(n).fit_transform(enter)
+
+        model.fit(Xtrain_poly, ytrain)
+        predict = model.predict(Xtest_poly)
+        # print(predict)
+        from sklearn.metrics import mean_squared_error
+
+        print("Prediction: " + str(model.predict(enter)))
+
+        # print("C: "+str(C))
+        # print("coef: "+str(model.coef_))
+        # print("intercept: "+str(model.intercept_))
+        print("mean squared error: " + str(mean_squared_error(ytest, predict)))
