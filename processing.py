@@ -37,6 +37,9 @@ TA = 'tyre_age'
 U = 'used'
 NP = 'next_pit'
 TOT = 'total_laps'
+SOFT = 'soft'
+MED = 'medium'
+HARD = 'hard'
 # APT = 'avg_pit_time'
 
 
@@ -52,6 +55,7 @@ def processPitData(df, tyref, pitf, lapsf):
     use_soft = [0] * len(laps)
     use_medium = [0] * len(laps)
     use_hard = [0] * len(laps)
+    pit_times = [0] * len(laps)
     # current_tyre = None
     tyre_age = 0
     last_pit_index = 0
@@ -82,6 +86,7 @@ def processPitData(df, tyref, pitf, lapsf):
             last_pit_index = i
         elif pit != 0:
             pit_this_lap[i] = 1
+            pit_times[i+1] = pit
             # current_tyre = tyre
             tyre_age = 0
 
@@ -96,6 +101,10 @@ def processPitData(df, tyref, pitf, lapsf):
     df[TA] = tyre_ages
     df[PTL] = pit_this_lap
     df[NP] = next_pit
+    df[SOFT] = use_soft
+    df[MED] = use_medium
+    df[HARD] = use_hard
+    df[PT] = pit_times
 
 
 def processTimeField(df, field):
@@ -227,6 +236,20 @@ def toMs(item):
     return (a.minute * 60) + (a.second) + (a.microsecond / 1000000)
 
 
+def removePitLaps(df):
+    laps = df.loc[:, PTL]
+    to_drop = []
+    for i in range(len(laps)):
+        if laps[i] == 1:
+            to_drop.append(i)
+            to_drop.append(i + 1)
+    for i in to_drop:
+        a, b = df.axes
+        if i in a:
+            print(i)
+            df.drop(i, axis=0, inplace=True)
+
+
 def main():
 
     # # Process individual races
@@ -258,20 +281,31 @@ def main():
     sau = pd.read_csv(OUT + "saudi arabian.csv")
     aut = pd.read_csv(OUT + "austrian.csv")
     df = pd.concat([df, abu, aus, bel, fre, hun, mex, mia, sau, aut], ignore_index=True)
-    removeZeros(df, [LT])
+    df.to_csv(OUT + 'concat.csv')
+    processPosition(df, P)
+    df.reset_index(inplace=True, drop=True)
+    df.to_csv(OUT + "temp.csv", index=False)
+    df = pd.read_csv(OUT + "temp.csv")
+    # removePitLaps(df)
     df.reset_index(inplace=True, drop=True)
     removeSCLaps(df, R, LN)
     df.reset_index(inplace=True, drop=True)
     removeStartLaps(df, LN)
+    df.reset_index(inplace=True, drop=True)
+    removeZeros(df, [LT])
+    df.reset_index(inplace=True, drop=True)
     # df.to_csv(OUT + "race_data_no_sc.csv", index=False)
 
-    # df = pd.read_csv(OUT + "race_data_no_SC.csv")
-    df.reset_index(inplace=True, drop=True)
-    processPosition(df, P)
+    # # df = pd.read_csv(OUT + "race_data_no_SC.csv")
     # df.reset_index(inplace=True, drop=True)
-    # removeStartLaps(df, LN)
+    # processPosition(df, P)
+    # df.reset_index(inplace=True, drop=True)
+    
+    
+    
+    
 
-    df.to_csv(OUT + "race_data_no_dnfs.csv", index=False)
+    df.to_csv(OUT + "race_data_model_2.csv", index=False)
 
 
 
