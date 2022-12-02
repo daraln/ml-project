@@ -4,23 +4,25 @@ import numpy as np
 import pandas as pd
 import sklearn
 import math
+import DataGlobals as g
 
-df = pd.read_csv( "nostarts_nosc.csv" )
+df = pd.read_csv( "./processed_data/race_data_no_dnfs.csv" )
 print( df . head ( ) )
 race = df.iloc[:,3]
 
-lap	= df.iloc[:,4]
-short_name = df.iloc[:,5]
-id = df.iloc[:,6]
-team = df.iloc[:,7]
-engine = df.iloc[:,8]
-grid_position = df.iloc[:,9]
-quali_time = df.iloc[:,10]
-lap_position = df.iloc[:,11]
-lap_time = df.iloc[:,12]
-gap_to_leader = df.iloc[:,13]
-position = df.iloc[:,14]
-points = df.iloc[:,15]
+
+lap	= df.loc[:,g.LAP_N]
+short_name = df.loc[:,g.SHORT_NAME]
+driver_id = df.loc[:,g.ID]
+team = df.loc[:,g.TEAM]
+engine = df.loc[:,g.ENGINE]
+grid_position = df.loc[:,g.GRID]
+quali_time = df.loc[:,g.QUALI_TIME]
+lap_position = df.loc[:,g.LAP_POS]
+lap_time = df.loc[:,g.LAP_TIME]
+gap_to_leader = df.loc[:,g.GTL]
+position = df.loc[:,g.POS]
+points = df.loc[:,g.POINTS]
 fastest_s1 = df.iloc[:,16]
 fastest_s2 = df.iloc[:,17]
 fastest_s3 = df.iloc[:,18]
@@ -29,7 +31,7 @@ s1_speed = df.iloc[:,20]
 s2_speed = df.iloc[:,21]
 s3_speed = df.iloc[:,22]
 speed_trap = df.iloc[:,23]
-tyre = df.iloc[:,24]
+tyre = df.loc[:, g.TYRE_STRING]
 pit_time = df.iloc[:,25]
 tyre_num = df.iloc[:, 26]
 used = df.iloc[:, 27]
@@ -38,9 +40,9 @@ pit_this_lap = df.iloc[:, 29]
 next_pit = df.iloc[:, 30]
 total_laps = df.iloc[:, 31]
 lap_pcts = df.iloc[:, 32]
-tyre_age_pct = df.iloc[:, 33]
-next_pit_pcts = df.iloc[:, 34]
-distances = df.iloc[:, 35]
+# tyre_age_pct = df.iloc[:, 33]
+# next_pit_pcts = df.iloc[:, 34]
+# distances = df.iloc[:, 35]
 soft=[]
 medium=[]
 hard=[]
@@ -57,20 +59,20 @@ for i in range(len(tyre)):
         soft.append(0)
         medium.append(0)
         hard.append(1)
-min = []
+minimum = []
 
 for i in range(len(race)):
     j = -1
     if i==0:
-        min.append(999)
+        minimum.append(999)
         j+1
     if i>0:
         if race[i] != race[i - 1]:
-            min.append(999)
+            minimum.append(999)
             j+1
-    if min[j]>lap_time[i]:
-        min[j] = lap_time[i]
-print(min)
+    if minimum[j]>lap_time[i]:
+        minimum[j] = lap_time[i]
+# print(minimum)
 lap_time_norm = []
 for i in range(len(lap_time)):
     j = -1
@@ -79,12 +81,24 @@ for i in range(len(lap_time)):
     if i>0:
         if race[i] != race[i - 1]:
             j+1
-    lap_time_norm.append(lap_time[i]/min[j])
+    lap_time_norm.append(lap_time[i]/minimum[j])
 
-#X=np.column_stack( ( quali_time, gap_to_leader, speed_trap, soft,medium,hard, lap_pcts, lap,pit_time, tyre_age,total_laps,distances,next_pit ) )
-X=np.column_stack( ( soft,medium,hard,tyre_age ,lap_pcts,quali_time, pit_time,pit_this_lap) )#features
-#y = lap_time
-y = lap_time_norm
+# X=np.column_stack( ( quali_time, gap_to_leader, speed_trap, soft,medium,hard, lap_pcts, lap,pit_time, tyre_age,total_laps,distances,next_pit ) )
+
+# This is easier than using indices
+tyre_age_pct = df.loc[:, g.TYRE_AGE_PCT]
+tyre_num = df.loc[:, g.TYRE_NUM]
+lap_pcts = df.loc[:, g.LAP_PCT]
+quali_time = df.loc[:, g.QUALI_TIME]
+pit_time = df.loc[:, g.PIT_TIME]
+lap_time = df.loc[:, g.LAP_TIME]
+distance = df.loc[:, g.DISTANCE]
+used = df.loc[:, g.USED]
+
+X=np.column_stack( ( soft, medium, hard, tyre_age_pct, lap_pcts,quali_time, pit_time) )#features
+y = lap_time
+# print(y)
+# y = lap_time_norm
 from sklearn.model_selection import train_test_split    #holding back 20% of data for testing
 Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.2)
 
@@ -99,7 +113,8 @@ for C in C_range:
     Xtest_poly = PolynomialFeatures(n).fit_transform(Xtest)
     X_poly = PolynomialFeatures(n).fit_transform(X)
     #enter = [[90,5,300,1,0,0,0.2,5,20,10,60,5000,15]]
-    enter = [[1,0,0,10,0.1,90.5,20,0]]       #predict particular scenarios
+    # enter = [[1,0,0,10,0.1,90.5,20,0]]       #predict particular scenarios
+    enter = [[1, 0, 0, 0.5, 0.5, 95.3, 0]]
     enter = PolynomialFeatures(n).fit_transform(enter)
     model = Lasso(alpha)
     #model = Ridge(alpha)

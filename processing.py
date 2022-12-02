@@ -161,11 +161,23 @@ def processDist(df, race):
     df['distances'] = lap_distances
 
 
+def processPosition(df, pos):
+    positions = df.loc[:, pos]
+    to_drop = []
+    for i in range(len(positions)):
+        if positions[i] == "NC":
+            to_drop.append(i)
+            continue
+        positions[i] = int(str(positions[i]).split(' ')[0])
+    for i in to_drop:
+        df.drop(i, axis=0, inplace=True)
+
+
 def removeStartLaps(df, lap_field):
     laps = df.loc[:, lap_field]
     to_drop = []
     for i in range(len(laps)):
-        if laps[i] == 0:
+        if laps[i] == 0 or laps[i] == 1:
             to_drop.append(i)
     for i in to_drop:
         df.drop(i, axis=0, inplace=True)
@@ -216,6 +228,8 @@ def toMs(item):
 
 
 def main():
+
+    # # Process individual races
     # df = pd.read_csv(IN + "austrian.csv")
     # processTimeField(df, LT)
     # processTimeField(df, Q)
@@ -230,9 +244,9 @@ def main():
     # processLapPct(df, LN, TA, NP)
     # processDist(df, R)
     # print(df)
-
     # df.to_csv(OUT + "austrian.csv", index=False)
 
+    # # Join all and remove bad rows
     df = pd.read_csv(OUT + "bahrain.csv")
     abu = pd.read_csv(OUT + "abu dhabi.csv")
     aus = pd.read_csv(OUT + "australian.csv")
@@ -244,20 +258,20 @@ def main():
     sau = pd.read_csv(OUT + "saudi arabian.csv")
     aut = pd.read_csv(OUT + "austrian.csv")
     df = pd.concat([df, abu, aus, bel, fre, hun, mex, mia, sau, aut], ignore_index=True)
-
     removeZeros(df, [LT])
-    df.reset_index(inplace=True)
+    df.reset_index(inplace=True, drop=True)
     removeSCLaps(df, R, LN)
-    df.reset_index(inplace=True)
+    df.reset_index(inplace=True, drop=True)
     removeStartLaps(df, LN)
-    # df.reset_index(inplace=True)
+    # df.to_csv(OUT + "race_data_no_sc.csv", index=False)
 
-    # df.to_csv(OUT + "race_data_no_starts.csv", index=False)
+    # df = pd.read_csv(OUT + "race_data_no_SC.csv")
+    df.reset_index(inplace=True, drop=True)
+    processPosition(df, P)
+    # df.reset_index(inplace=True, drop=True)
+    # removeStartLaps(df, LN)
 
-    # df = pd.read_csv(OUT + "race_data_no_starts.csv")
-    # removeZeros(df, [LT])
-    # removeSCLaps(df, R, LN)
-    df.to_csv(OUT + "race_data_no_SC.csv")
+    df.to_csv(OUT + "race_data_no_dnfs.csv", index=False)
 
 
 
