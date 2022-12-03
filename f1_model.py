@@ -1,10 +1,8 @@
 import DataGlobals as g
 import sklearn as sk
-from sklearn.preprocessing import Normalizer
-from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import PolynomialFeatures
-from sklearn.neighbors import KNeighborsRegressor 
+from sklearn.neighbors import KNeighborsRegressor
 from sklearn.linear_model import Lasso
 from sklearn.linear_model import Ridge
 # from sklearn.metrics import mean_absolute_error
@@ -251,7 +249,6 @@ def main():
         model.fit(X[train], y[train])
         predict = model.predict(X[test])
         print("mean squared error: " + str(mean_squared_error(y[test], predict)))
-        # err.append(mean_squared_error(y[test], predict, squared=True))
 
     ys, xs = [], []
     for i in range(21):
