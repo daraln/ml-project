@@ -1,0 +1,12 @@
+instructions.txt
+
+f1_model.py is the main file, it should output several different figures relating to our models and particularly cross-validation and hyper-parameter selection
+
+scrape_all.py is the main file used for data gathering which became quite complex
+
+processing.py was used to process the data in different areas (you would need to write the main function to determine which custom functions to use to alter the data)
+
+other python files are older workspaces
+
+there is a selection of different data files but the one that was used in the submission is withcompounds.csv which includes the c1-c5 tyre compounds
+

@@ -40,6 +40,11 @@ TOT = 'total_laps'
 SOFT = 'soft'
 MED = 'medium'
 HARD = 'hard'
+C1 = 'c1'
+C2 = 'c2'
+C3 = 'c3'
+C4 = 'c4'
+C5 = 'c5'
 # APT = 'avg_pit_time'
 
 
@@ -142,8 +147,26 @@ def processLapPct(df, lap_field, tyre_age, next_pit):
             start_index = i
     df[TOT] = total_laps
     df['lap_pcts'] = lap_pcts
-    df['tyre_age_pct'] = tyre_age_pcts
-    df['next_pit_pcts'] = next_pit_pcts
+    # df['tyre_age_pct'] = tyre_age_pcts
+    # df['next_pit_pcts'] = next_pit_pcts
+
+
+def processLapPctP(df, lap_field):
+    start_index = 0
+    laps = df.loc[:, lap_field]
+    lap_pcts = [0] * len(laps)
+    total_laps = [0] * len(laps)
+    for i in range(len(laps)):
+        lap = laps[i]
+        if lap == 0 and i > 0:
+            max_laps = float(laps[i - 1])
+            for j in range(start_index, i):
+                lap_pcts[j] = float(laps[j]) / max_laps
+
+                total_laps[j] = max_laps
+            start_index = i
+    df[TOT] = total_laps
+    df['lap_pcts'] = lap_pcts
 
     for i in range(len(laps)):
         if isinstance(laps[i], str) and laps[i] == 'Start':
@@ -221,6 +244,9 @@ def removeSCLaps(df, race, lap_field):
     to_drop = []
     for i in range(len(races)):
         r = races[i]
+        if r == 'Emilia Romagna':
+            to_drop.append(i)
+            continue
         if laps[i] in race_names[r]:
             to_drop.append(i)
     for i in to_drop:
@@ -253,7 +279,7 @@ def removePitLaps(df):
 def main():
 
     # # Process individual races
-    # df = pd.read_csv(IN + "austrian.csv")
+    # df = pd.read_csv(OUT + "ALL_RACES_DATA.csv")
     # processTimeField(df, LT)
     # processTimeField(df, Q)
     # processTimeField(df, GTL)
@@ -261,40 +287,117 @@ def main():
     # processTimeField(df, FS2)
     # processTimeField(df, FS3)
     # processTimeField(df, IDE)
-    # processTimeField(df, PT)
+    # # processTimeField(df, PT)
     # processLaps(df, LN)
-    # processPitData(df, TY, PT, LN)
-    # processLapPct(df, LN, TA, NP)
-    # processDist(df, R)
+    # # processPitData(df, TY, PT, LN)
+    # processLapPctP(df, LN)
+    # processPosition(df, P)
+    # df.reset_index(inplace=True, drop=True)
+    # # processDist(df, R)
     # print(df)
-    # df.to_csv(OUT + "austrian.csv", index=False)
+    # processPosition(df, P)
+    # df.reset_index(inplace=True, drop=True)
+    # df.to_csv(OUT + "ALL_RACES_DATA_2.csv", index=False)
 
     # # Join all and remove bad rows
-    df = pd.read_csv(OUT + "bahrain.csv")
-    abu = pd.read_csv(OUT + "abu dhabi.csv")
-    aus = pd.read_csv(OUT + "australian.csv")
-    bel = pd.read_csv(OUT + "belgian.csv")
-    fre = pd.read_csv(OUT + "french.csv")
-    hun = pd.read_csv(OUT + "hungarian.csv")
-    mex = pd.read_csv(OUT + "mexican.csv")
-    mia = pd.read_csv(OUT + "miami.csv")
-    sau = pd.read_csv(OUT + "saudi arabian.csv")
-    aut = pd.read_csv(OUT + "austrian.csv")
-    df = pd.concat([df, abu, aus, bel, fre, hun, mex, mia, sau, aut], ignore_index=True)
-    df.to_csv(OUT + 'concat.csv')
-    processPosition(df, P)
-    df.reset_index(inplace=True, drop=True)
-    df.to_csv(OUT + "temp.csv", index=False)
-    df = pd.read_csv(OUT + "temp.csv")
-    # removePitLaps(df)
-    df.reset_index(inplace=True, drop=True)
-    removeSCLaps(df, R, LN)
-    df.reset_index(inplace=True, drop=True)
-    removeStartLaps(df, LN)
-    df.reset_index(inplace=True, drop=True)
-    removeZeros(df, [LT])
-    df.reset_index(inplace=True, drop=True)
-    # df.to_csv(OUT + "race_data_no_sc.csv", index=False)
+    # df = pd.read_csv(OUT + "bahrain.csv")
+    # abu = pd.read_csv(OUT + "abu dhabi.csv")
+    # aus = pd.read_csv(OUT + "australian.csv")
+    # bel = pd.read_csv(OUT + "belgian.csv")
+    # fre = pd.read_csv(OUT + "french.csv")
+    # hun = pd.read_csv(OUT + "hungarian.csv")
+    # mex = pd.read_csv(OUT + "mexican.csv")
+    # mia = pd.read_csv(OUT + "miami.csv")
+    # sau = pd.read_csv(OUT + "saudi arabian.csv")
+    # aut = pd.read_csv(OUT + "austrian.csv")
+    # df = pd.concat([df, abu, aus, bel, fre, hun, mex, mia, sau, aut], ignore_index=True)
+    # df.to_csv(OUT + 'concat.csv')
+    # processPosition(df, P)
+    # df.reset_index(inplace=True, drop=True)
+    # df.to_csv(OUT + "temp.csv", index=False)
+    # df = pd.read_csv(OUT + "temp.csv")
+    # # removePitLaps(df)
+    # # df.reset_index(inplace=True, drop=True)
+    # removeSCLaps(df, R, LN)
+    # df.reset_index(inplace=True, drop=True)
+    # removeStartLaps(df, LN)
+    # df.reset_index(inplace=True, drop=True)
+    # removeZeros(df, [LT])
+    # df.reset_index(inplace=True, drop=True)
+    # df.to_csv(OUT + "race_data_model_3.csv", index=False)
+    df = pd.read_csv(OUT + 'final.csv')
+    ef = pd.read_csv(OUT + 'withcompounds.csv')
+    soft = df.loc[:, SOFT]
+    medium = df.loc[:, MED]
+    hard = df.loc[:, HARD]
+    processPosition(ef, P)
+    ef.reset_index(inplace=True, drop=True)
+    removeSCLaps(ef, R, LN)
+    ef.reset_index(inplace=True, drop=True)
+    removeZeros(ef, [LT])
+    ef.reset_index(inplace=True, drop=True)
+
+    # c1, c2, c3, c4, c5 = [0] * len(soft), [0] * len(soft), [0] * len(soft), [0] * len(soft), [0] * len(soft),
+    c1=ef.iloc[:, 36]
+    c2=ef.iloc[:, 37]
+    c3=ef.iloc[:, 38]
+    c4=ef.iloc[:, 39]
+    c5=ef.iloc[:, 40]
+    for i in range(len(soft)):
+        if hard[i] == 1:
+            if c5[i] == 1:
+                c1[i] = 0
+                c2[i] = 0
+                c3[i] = 0
+                c4[i] = 0
+            if c5[i] == 0 and c4[i]==1:
+                c1[i] = 0
+                c2[i] = 0
+                c3[i] = 0
+                c5[i] = 0
+            if c5[i] == 0 and c4[i]==0 and c3[i] == 1:
+                c1[i] = 0
+                c2[i] = 0
+                c3[i] = 0
+                c5[i] = 0
+        if soft[i] == 1:
+            if c1[i] == 1:
+                c5[i] = 0
+                c2[i] = 0
+                c3[i] = 0
+                c4[i] = 0
+            if c1[i] == 0 and c2[i]==1:
+                c1[i] = 0
+                c4[i] = 0
+                c3[i] = 0
+                c5[i] = 0
+            if c1[i] == 0 and c2[i]==0 and c3[i] == 1:
+                c1[i] = 0
+                c2[i] = 0
+                c4[i] = 0
+                c5[i] = 0
+        if medium[i] == 1:
+            if c5[i] == 1 and c4[i] == 1:
+                c1[i] = 0
+                c2[i] = 0
+                c3[i] = 0
+                c5[i] = 0
+            if c5[i] == 0 and c4[i]==1 and c3[i] == 1:
+                c1[i] = 0
+                c2[i] = 0
+                c4[i] = 0
+                c5[i] = 0
+            if c5[i] == 0 and c4[i]==0 and c3[i] == 1 and c2[i] == 1:
+                c1[i] = 0
+                c4[i] = 0
+                c3[i] = 0
+                c5[i] = 0
+    df[C1] = c1
+    df[C2] = c2
+    df[C3] = c3
+    df[C4] = c4
+    df[C5] = c5
+    df.to_csv(OUT+'final.csv')
 
     # # df = pd.read_csv(OUT + "race_data_no_SC.csv")
     # df.reset_index(inplace=True, drop=True)
